@@ -43,4 +43,8 @@ public class ChatServer {
 		}
 	}
 
+	public void removeMember(ChatMember member) {
+		members.remove(member);
+	}
+
 }

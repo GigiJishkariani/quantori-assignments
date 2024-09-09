@@ -15,6 +15,7 @@ public class ChatMember {
 	private String name;
 	private ChatServer server;
 	private PrintWriter printer;
+	private Socket socket;
 
 	private WorkerThread sendingWorker;
 
@@ -23,6 +24,7 @@ public class ChatMember {
 	}
 
 	void handleConnection(Socket socket) {
+		this.socket = socket;
 		initializeOutputProcessing(socket);
 		processInput(socket);
 	}
@@ -68,7 +70,7 @@ public class ChatMember {
 		}
 			break;
 		case "exit": {
-			// TODO: homework
+			handleExit();
 		}
 			break;
 		default: {
@@ -91,6 +93,18 @@ public class ChatMember {
 		}
 		printer.println(message);
 		printer.flush();
+	}
+
+	private void handleExit() {
+		if (name != null) {
+			server.publish(name + " has left the chat");
+		}
+		server.removeMember(this);
+		try {
+			socket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
