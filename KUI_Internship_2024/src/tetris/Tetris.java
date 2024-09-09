@@ -1,74 +1,98 @@
 package tetris;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 
 public class Tetris {
 
+	private static ScheduledExecutorService service;
 	static final Color[] COLORS = { Color.BLACK, Color.BLUE, Color.RED, Color.GREEN, Color.CYAN, Color.MAGENTA,
 			Color.ORANGE, Color.YELLOW };
 
 	public static void main(String[] args) {
 
 		JFrame frame = new JFrame("Tetris");
-
-		JPanel panel = new JPanel();
-		panel.setPreferredSize(new Dimension(400, 700));
-
-		frame.add(panel);
-
-		frame.pack();
-
-		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-		frame.setVisible(true);
-
-		Graphics2D graphics = (Graphics2D) panel.getGraphics();
-
 		TetrisModel model = new TetrisModel(TetrisModel.DEFAULT_WIDTH, TetrisModel.DEFAULT_HEIGHT,
 				TetrisModel.DEFAULT_COLORS_NUMBER);
+		View view = new View(model);
 
-		View view = new View(new Graphics() {
+		JPanel sidePanel = new JPanel(new GridBagLayout());
+		sidePanel.setPreferredSize(new Dimension(150, 700));
 
-			@Override
-			public void drawBoxAt(int i, int j, int value) {
-				graphics.setColor(COLORS[value]);
-				graphics.fillRect(i, j, View.BOX_SIZE, View.BOX_SIZE);
-			}
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.insets = new Insets(10, 10, 10, 40);
+		gbc.anchor = GridBagConstraints.WEST;
 
-		});
+		JLabel scoreLabel = new JLabel("Score: " + TetrisModel.SCORE);
+		JLabel levelLabel = new JLabel("Level: " + TetrisModel.LEVEL);
+		scoreLabel.setFont(new Font("Arial", Font.BOLD, 20));
+		levelLabel.setFont(new Font("Arial", Font.BOLD, 20));
+
+		sidePanel.add(scoreLabel, gbc);
+		gbc.gridy = 1;
+		sidePanel.add(levelLabel, gbc);
+
+		frame.setLayout(new BorderLayout());
+		frame.add(view, BorderLayout.CENTER);
+		frame.add(sidePanel, BorderLayout.EAST);
+
+		frame.pack();
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		frame.setVisible(true);
 
 		Controller controller = new Controller(model, view);
+
+		model.addListener(new ModelListener() {
+			@Override
+			public void onChange(TetrisModel model) {
+				scoreLabel.setText("Score: " + TetrisModel.SCORE);
+				levelLabel.setText("Level: " + TetrisModel.LEVEL);
+				view.repaint();
+			}
+
+			@Override
+			public void gameOver() {
+				view.setGameOver(true);
+				frame.add(view.getGameOverPanel(), BorderLayout.CENTER);
+				frame.revalidate();
+				view.repaint();
+				service.shutdown();
+			}
+		});
 
 		frame.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				switch (e.getKeyCode()) {
-				case KeyEvent.VK_LEFT: {
-					controller.moveLeft();
-					break;
-				}
-				case KeyEvent.VK_RIGHT: {
-					controller.moveRight();
-					break;
-				}
+					case KeyEvent.VK_LEFT -> {
+						controller.moveLeft();
+						controller.removeRow();
+					}
+					case KeyEvent.VK_RIGHT -> {
+						controller.moveRight();
+						controller.removeRow();
+					}
+					case KeyEvent.VK_UP -> {
+						controller.rotate();
+						controller.removeRow();
+					}
+					case KeyEvent.VK_DOWN -> {
+						controller.drop();
+						controller.removeRow();
+					}
 				}
 			}
 		});
 
-		ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-		service.scheduleAtFixedRate(controller::slideDown, 0, 1, TimeUnit.SECONDS);
-
+		service = Executors.newSingleThreadScheduledExecutor();
+		int speed = TetrisModel.SPEED;
+		service.scheduleAtFixedRate(controller::slideDown, 0, speed, TimeUnit.MILLISECONDS);
 	}
-
 }

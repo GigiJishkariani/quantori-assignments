@@ -9,8 +9,22 @@ public class TetrisModel implements GameEventsListener {
 	public static final int DEFAULT_HEIGHT = 20;
 	public static final int DEFAULT_WIDTH = 10;
 	public static final int DEFAULT_COLORS_NUMBER = 7;
+	public static boolean IS_LOST = false;
+
+	public static int SPEED = 1000;
+
+	public static int LEVEL = 0;
+	public static int STARTING_LEVEL = 0;
+
+	public static int ROWS_CLEARED_NUM = 0;
+	public static int ROWS_CLEARED_CURRENTNUM = 0;
+	public static int SCORE = 0;
+	public static int STARTING_SCORE = 0;
 
 	int maxColors;
+	public int[][] field;
+	public int[][] figure;
+	public Pair position;
 	public TetrisState state = new TetrisState();
 	final List<ModelListener> listeners = new ArrayList<>();
 
@@ -59,9 +73,20 @@ public class TetrisModel implements GameEventsListener {
 		listeners.forEach(listener -> listener.onChange(this));
 	}
 
-	private void gameOver() {
-		// TODO Auto-generated method stub
+	@Override
+	public void gameOver() {
+		System.out.println("Game Over");
+		IS_LOST = true;
+		listeners.forEach(ModelListener::gameOver);
+	}
 
+
+	public void restartGame(int width, int height, int colorsNumber) {
+		this.field = new int[height][width];
+		this.position = new Pair(0, 0); // Reset position
+		SCORE = STARTING_SCORE;
+		LEVEL = STARTING_LEVEL;
+		initFigure();
 	}
 
 	@Override
@@ -84,7 +109,8 @@ public class TetrisModel implements GameEventsListener {
 
 	@Override
 	public void rotate() {
-		int[][] f = new int[4][4];
+		int length = state.figure.length;
+		int[][] f = new int[length][length];
 		for (int r = 0; r < state.figure.length; r++) {
 			for (int c = 0; c < state.figure[r].length; c++) {
 				f[c][3 - r] = state.figure[r][c];
@@ -96,9 +122,11 @@ public class TetrisModel implements GameEventsListener {
 
 	@Override
 	public void drop() {
-		// TODO Auto-generated method stub
-
-		notifyListeners();
+		Pair newPosition = new Pair(state.position.x(), state.position.y() + 1);
+		if (isNewFiguresPositionValid(newPosition)) {
+			state.position = newPosition;
+			notifyListeners();
+		}
 	}
 
 	public boolean isNewFiguresPositionValid(Pair newPosition) {
@@ -114,6 +142,87 @@ public class TetrisModel implements GameEventsListener {
 
 		return result[0];
 	}
+
+	@Override
+	public void removeRow(){
+		for (int i = 0; i < state.field.length; i++) {
+			boolean isFull = true;
+			for (int j = 0; j < state.field[i].length; j++) {
+				if (state.field[i][j] == 0){
+					isFull = false;
+					break;
+				}
+			}
+			if(isFull){
+				for (int k = i; k > 0; k--) {
+					for (int j = 0; j < state.field[k].length; j++) {
+						state.field[k][j] = state.field[k-1][j];
+					}
+				}
+				for (int j = 0; j < state.field[0].length; j++) {
+					state.field[0][j] = 0;
+				}
+				i--;
+				ROWS_CLEARED_NUM += 1;
+				ROWS_CLEARED_CURRENTNUM += 1;
+				int currentLevel = checkLevel();
+				System.out.println("LEVEL : " +LEVEL);
+				System.out.println("SCORE : " + SCORE);
+				getScore(ROWS_CLEARED_CURRENTNUM, currentLevel);
+				ROWS_CLEARED_CURRENTNUM = 0;
+			}
+		}
+		notifyListeners();
+	}
+
+	private void getScore(int rowsClearedCurrentnum, int currentLevel) {
+		switch (rowsClearedCurrentnum){
+			case 1:
+				SCORE += 40 * (currentLevel + 1);
+				break;
+			case 2:
+				SCORE += 100 * (currentLevel + 1);
+				break;
+			case 3:
+				SCORE += 300 * (currentLevel + 1);
+				break;
+			case 4:
+				SCORE += 1200 * (currentLevel + 1);
+				break;
+
+		}
+
+		changeSpeed();
+	}
+
+	private void changeSpeed() {
+		int newSpeed = SPEED;
+		if(SCORE >= 1000){
+			newSpeed += 3000;
+		} else if (SCORE >= 500) {
+			newSpeed += 2000;
+		} else if (SCORE >= 250) {
+			newSpeed += 1000;
+		} else if (SCORE >= 125) {
+			newSpeed += 500;
+		} else {
+			newSpeed = SPEED;
+		}
+		SPEED = newSpeed;
+
+		System.out.println("SPEED : "+ SPEED);
+
+	}
+
+	public int checkLevel() {
+		if(ROWS_CLEARED_NUM == 2){
+			LEVEL += 1;
+			ROWS_CLEARED_NUM = 0;
+
+		}
+		return LEVEL;
+	}
+
 
 	private void walkThroughAllFigureCells(Pair newPosition, BiConsumer<Pair, Pair> payload) {
 		for (int row = 0; row < state.figure.length; row++) {

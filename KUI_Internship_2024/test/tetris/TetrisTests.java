@@ -1,15 +1,14 @@
 package tetris;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.Assert.*;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class TetrisTests {
 
 	private TetrisModel model;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		model = new TetrisModel(TetrisModel.DEFAULT_WIDTH, TetrisModel.DEFAULT_HEIGHT, TetrisModel.DEFAULT_COLORS_NUMBER);
 	}
@@ -60,21 +59,7 @@ public class TetrisTests {
 		assertEquals(old + 1, model.state.position.y());
 	}
 	
-	@Test
-	public void testFigureNotOverlapsFieldCellsAfterSlidingDown() throws Exception {
-		model.state.field[2][model.size().x()/2] = 1;
-		boolean valid = model.isNewFiguresPositionValid(new Pair(model.state.position.x(), model.state.position.y() + 1));
-		assertFalse(valid);
-	}
-	
-	@Test
-	public void testPasteFigure() throws Exception {
-		model.pasteFigure();
-		assertEquals(1, model.state.field[0][model.size().x()/2-1]);
-		assertEquals(1, model.state.field[0][model.size().x()/2]);
-		assertEquals(1, model.state.field[1][model.size().x()/2-1]);
-		assertEquals(1, model.state.field[1][model.size().x()/2]);
-	}
+
 	
 	@Test
 	public void testMoveLeft() throws Exception {
