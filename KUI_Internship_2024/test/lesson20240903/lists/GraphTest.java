@@ -1,16 +1,16 @@
 package lesson20240903.lists;
 
-import org.junit.Before;
-import org.junit.Test;
 
 import java.util.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.Assert.*;
 
 public class GraphTest {
     private Graph graph;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         graph = new Graph();
     }

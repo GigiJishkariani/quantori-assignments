@@ -2,7 +2,7 @@ package lesson20240903;
 
 import java.util.Arrays;
 
-class GraphWithMatrix {
+public class GraphWithMatrix {
     private int[][] adjMatrix;
     private int numVertices;
 

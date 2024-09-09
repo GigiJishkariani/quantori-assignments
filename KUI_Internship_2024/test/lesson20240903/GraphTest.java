@@ -1,14 +1,14 @@
 package lesson20240903;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class GraphTest {
     private GraphWithMatrix graph;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         graph = new GraphWithMatrix(4); // Initialize a graph with 4 vertices
     }
