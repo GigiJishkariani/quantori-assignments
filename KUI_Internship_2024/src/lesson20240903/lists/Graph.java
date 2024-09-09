@@ -1,9 +1,10 @@
 package lesson20240903.lists;
 import java.util.*;
 
-class Graph {
+public class Graph {
     private Map<Integer, List<Integer>> adjList;
-
+    private int firstVertex;
+    private int lastVertex;
     // Constructor
     public Graph() {
         adjList = new HashMap<>();
@@ -24,6 +25,8 @@ class Graph {
 
     // Add a directed edge to the graph
     public void addDirectedEdge(int source, int destination) {
+        if (firstVertex == 0) firstVertex = source;
+        lastVertex = destination;
         adjList.putIfAbsent(source, new ArrayList<>());
         adjList.putIfAbsent(destination, new ArrayList<>());
         adjList.get(source).add(destination);
@@ -57,5 +60,32 @@ class Graph {
         for (var entry : adjList.entrySet()) {
             System.out.println("Vertex " + entry.getKey() + " is connected to: " + entry.getValue());
         }
+    }
+
+    public Set<Integer> getVertices() {
+        return adjList.keySet();
+    }
+
+    public int getFirstVertex() {
+        return firstVertex;
+    }
+    public int getLastVertex() {
+        return lastVertex;
+    }
+
+
+    public int getOutDegree(int vertex) {
+        return adjList.containsKey(vertex) ? adjList.get(vertex).size() : 0;
+    }
+
+    public int getInDegree(int vertex) {
+        int inDegree = 0;
+        for (int key : adjList.keySet()) {
+            List<Integer> neighbors = adjList.get(key);
+            if (neighbors.contains(vertex)) {
+                inDegree++;
+            }
+        }
+        return inDegree;
     }
 }

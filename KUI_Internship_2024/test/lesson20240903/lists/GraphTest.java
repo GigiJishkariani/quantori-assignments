@@ -16,6 +16,11 @@ public class GraphTest {
     }
 
     @Test
+    public void testEulerianApproach(){
+
+    }
+
+    @Test
     public void testAddVertex() {
         graph.addVertex(1);
         graph.addVertex(2);

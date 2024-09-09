@@ -6,6 +6,7 @@ public class GraphWithMatrix {
     private int[][] adjMatrix;
     private int numVertices;
 
+
     // Constructor
     public GraphWithMatrix(int numVertices) {
         this.numVertices = numVertices;
