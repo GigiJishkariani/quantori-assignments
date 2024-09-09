@@ -43,7 +43,7 @@ public class Benchmark {
 		return new String(data);
 	}
 
-	private static List<String> generateLibrary(int librarySize) {
+	static List<String> generateLibrary(int librarySize) {
 		var library = new ArrayList<String>(librarySize);
 		for (int i = 0; i < librarySize; i++) {
 			var peptide = generateProtein(PROTEIN_SIZE);

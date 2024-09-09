@@ -1,65 +1,85 @@
 package lesson20240814;
 
-import static org.junit.Assert.*;
-
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class PeptidesTest {
+	private Peptides peptide;
 
-	private Peptides peptides;
-	private String peptide;
-	private String protein;
-
-	@Before
-	public void setup() {
-		peptide = "RNLKDGHI";
-		protein = "ABERNLKDGHIHWEPOGCVNWOORNLKDGHIMXVNXMCWERY";
-		var library = List.of(peptide, "ORNLKDGH", "ABCDEFGH");
-		peptides = new Peptides(Peptides.DEFAULT_PEPTIDE_SIZE, protein, library);
-	}
-	
-	@Test
-	public void test() {
-		List<Integer> positions = peptides.search(peptide);
-		assertTrue(positions.contains(3));
-		assertTrue(positions.contains(23));
-	}
-	
-	@Test
-	public void testKMersExistAndFilledCorrectly() throws Exception {
-		assertNotNull(peptides.kmers);
-		assertEquals(34, peptides.kmers.size());
-	}
-	
-	@Test
-	public void testSpecificKMerExistsAtTwoPositions() throws Exception {
-		assertEquals(List.of(3, 23), peptides.kmers.get(peptide));
-	}
-	
-	@Test
-	public void testSearchLibraryPeptidesIsEmpty() throws Exception {
-		peptides = new Peptides(Peptides.DEFAULT_PEPTIDE_SIZE, protein, List.of("HELLO", "BELLO"));
-		Map<String, List<Integer>> existingPeptides = peptides.searchLibrary();
-		assertNotNull(existingPeptides);
-		assertTrue(existingPeptides.isEmpty());
+	@BeforeEach
+	public void setUp() {
+		String protein = "ABCDEFGHIJKL";
+		List<String> library = Arrays.asList("ABCDEFGH", "IJKLMNOP");
+		peptide = new Peptides(Peptides.DEFAULT_PEPTIDE_SIZE, protein, library);
 	}
 
 	@Test
-	public void testSearchLibraryPeptides() throws Exception {
-		Map<String, List<Integer>> existingPeptides = peptides.searchLibrary();
-		assertNotNull(existingPeptides);
-		assertEquals(2, existingPeptides.size());
+	public void testCreateKMersDictionary() {
+		peptide.createKMersDictionary();
+		assertEquals(5, peptide.kmers.size());
+
+		List<Integer> positions = peptide.kmers.get("ABCDEFGH");
+		assertNotNull(positions);
+		assertTrue(positions.contains(0));
 	}
-	
+
 	@Test
-	public void testAlphabetInit() throws Exception {
-		assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ", new String(Benchmark.ALPHABET));
+	public void testConvertToLong() {
+		String peptideString = "ABCDEFGH";
+		long expectedLong = peptide.convertStringToLong(peptideString);
+
+		long calculatedValue = 0;
+		for (char c : peptideString.toCharArray()) {
+			calculatedValue = calculatedValue * 26 + (c - 'A');
+		}
+		assertEquals(calculatedValue, expectedLong);
 	}
-	
+
+	@Test
+	public void testConvertPeptidesToLong() {
+		peptide.convertPeptidesToLong();
+		long expectedLong1 = peptide.convertStringToLong("ABCDEFGH");
+		long expectedLong2 = peptide.convertStringToLong("IJKLMNOP");
+
+		assertTrue(peptide.longPeptides.containsKey(expectedLong1));
+		assertTrue(peptide.longPeptides.containsKey(expectedLong2));
+	}
+
+	@Test
+	public void testReverseSearch() {
+		peptide.convertPeptidesToLong();
+
+		peptide.reverseSearch();
+		assertTrue(peptide.longPeptides.get(peptide.convertStringToLong("ABCDEFGH")).contains(0));
+	}
+
+	@Test
+	public void testBinarySearch() {
+		List<String> library = Arrays.asList("ABCDEFGH", "IJKLMNOP");
+		Peptides peptide = new Peptides(Peptides.DEFAULT_PEPTIDE_SIZE, "ABCDEFGHIJKL", library);
+
+		long peptideLong = peptide.convertStringToLong("ABCDEFGH");
+		assertTrue(peptide.performBinarySearch(peptideLong));
+
+		long nonExistentPeptideLong = peptide.convertStringToLong("ZZZZZZZZ");
+		assertFalse(peptide.performBinarySearch(nonExistentPeptideLong));
+	}
+
+	@Test
+	public void testBinarySearchForKmers() {
+		List<String> library = Arrays.asList("ABCDEFGH", "IJKLMNOP");
+		Peptides peptide = new Peptides(Peptides.DEFAULT_PEPTIDE_SIZE, "ABCDEFGHIJKL", library);
+
+		peptide.searchKmersUsingBinarySearch();
+	}
 }
 
 
