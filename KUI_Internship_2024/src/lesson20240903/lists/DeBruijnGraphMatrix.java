@@ -11,6 +11,7 @@ public class DeBruijnGraphMatrix {
         String sequence = "GATCAC";
         int k = 4;
 
+
         List<String> kMinusOneMers = generateKMers(sequence, k);
         Map<String, Integer> indexMap = buildIndexMap(kMinusOneMers);
         GraphWithMatrix graph = buildDeBruijnGraph(sequence, k, indexMap);
@@ -55,7 +56,11 @@ public class DeBruijnGraphMatrix {
             String suffix = kmer.substring(1);
             int prefixIndex = indexMap.get(prefix);
             int suffixIndex = indexMap.get(suffix);
-            graph.addEdge(prefixIndex, suffixIndex);
+            if (i == 0) {
+                graph.addEdge(prefixIndex, suffixIndex);
+            } else {
+                graph.addDirectedEdge(prefixIndex, suffixIndex);
+            }
         }
         return graph;
     }
