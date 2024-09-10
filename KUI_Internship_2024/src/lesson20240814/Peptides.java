@@ -6,8 +6,8 @@ public class Peptides {
 
 	public static final int DEFAULT_PEPTIDE_SIZE = 8;
 
-	private String protein;
-	private int peptideSize;
+	private final String protein;
+	private final int peptideSize;
 
 	public HashMap<String, List<Integer>> kmers = new LinkedHashMap<>();
 
@@ -25,7 +25,6 @@ public class Peptides {
 		convertPeptidesToLong();
 		peptidesToLongArray(library);
 	}
-
 
 
 	// Approach 1
@@ -73,6 +72,8 @@ public class Peptides {
 		}
 	}
 
+
+
 	// Approach 3
 	void convertPeptidesToLong() {
 		for (String peptideSequence : library) {
@@ -116,7 +117,7 @@ public class Peptides {
 		return Arrays.binarySearch(peptideLongArray, kmerEncoded) >= 0;
 	}
 
-	long convertStringToLong(String peptideSequence) {
+	static long convertStringToLong(String peptideSequence) {
 		long encodedValue = 0;
 		for (char aminoAcid : peptideSequence.toCharArray()) {
 			encodedValue = encodedValue * 26 + (aminoAcid - 'A');
